@@ -1,14 +1,20 @@
-var http = require('http');
-var express = require('express');
-var app = express();
+var express = require('express')
+  , logger = require('morgan')
+  , app = express()
+  , template = require('jade').compileFile(__dirname + '/source/templates/homepage.jade')
 
-app.set('port', process.env.OPENSHIFT_NODEJS_PORT || 8080);
-app.set('ip', process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
+app.use(logger('dev'))
+app.use(express.static(__dirname + '/static'))
 
-http.createServer(app).listen(app.get('port'), app.get('ip'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
+app.get('/', function (req, res, next) {
+  try {
+    var html = template({ title: 'Home' })
+    res.send(html)
+  } catch (e) {
+    next(e)
+  }
+})
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-});
+app.listen(process.env.PORT || 3000, function () {
+  console.log('Listening on http://localhost:' + (process.env.PORT || 3000))
+})
